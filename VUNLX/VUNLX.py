@@ -1,6 +1,8 @@
-import os
 import socket
-from scapy.all import sniff, IP, TCP
+import os
+import sys
+import whois  # Pastikan library whois sudah terinstall (pip install python-whois)
+import subprocess
 
 # Fungsi untuk membersihkan tampilan terminal
 def clear_screen():
@@ -20,7 +22,7 @@ def show_header():
 # Fungsi untuk menampilkan menu dan mendapatkan pilihan pengguna
 def show_menu():
     print("1. Port Scanner")
-    print("2. Port Knock Detection")
+    print("2. Live WHOIS Lookup")
     print("3. Service Enumerator")
     print("4. Exit\n")
     choice = input("Pilih fitur yang ingin Anda gunakan (1-4): ")
@@ -36,6 +38,15 @@ def port_scanner(target):
         if result == 0:
             print(f"Port {port} terbuka")
         sock.close()
+
+# Fungsi untuk melakukan WHOIS Lookup secara real-time
+def whois_lookup(domain):
+    try:
+        w = whois.whois(domain)
+        print(f"\nInformasi WHOIS untuk domain: {domain}\n")
+        print(w)
+    except Exception as e:
+        print(f"Terjadi kesalahan saat melakukan WHOIS Lookup: {e}")
 
 # Fungsi untuk enumerasi layanan pada port yang terbuka
 def service_enumerator(target):
@@ -53,17 +64,12 @@ def service_enumerator(target):
                 print(f"Port {port} terbuka tetapi layanan tidak dapat diidentifikasi")
         sock.close()
 
-# Fungsi untuk menangani paket yang diterima (Port Knock Detection)
-def packet_handler(packet):
-    if IP in packet and TCP in packet:
-        ip_src = packet[IP].src
-        port_dst = packet[TCP].dport
-        print(f"Terdeteksi knock pada port {port_dst} dari {ip_src}")
-
-# Fungsi untuk memonitor port knock
-def port_knock_detector(interface, ports):
-    print(f"Mendeteksi knock pada port {ports} di interface {interface}")
-    sniff(iface=interface, prn=packet_handler, filter="tcp", store=0)
+# Fungsi untuk menampilkan pilihan setelah fitur selesai digunakan
+def post_action_menu():
+    print("\n1. Kembali ke Menu Utama")
+    print("2. Exit\n")
+    choice = input("Pilih aksi selanjutnya (1-2): ")
+    return choice
 
 # Main program loop
 def main():
@@ -76,12 +82,10 @@ def main():
             target = input("Masukkan IP address target: ")
             clear_screen()
             port_scanner(target)
-        elif choice == '2':  # Ganti WHOIS Lookup dengan Port Knock Detection
-            interface = input("Masukkan nama interface untuk dipantau: ")
-            ports = input("Masukkan urutan port yang ingin dideteksi (pisahkan dengan koma, contoh: 22,80,443): ").split(',')
-            ports = [int(port) for port in ports]
+        elif choice == '2':
+            domain = input("Masukkan domain untuk WHOIS lookup: ")
             clear_screen()
-            port_knock_detector(interface, ports)
+            whois_lookup(domain)
         elif choice == '3':
             target = input("Masukkan IP address target: ")
             clear_screen()
@@ -92,8 +96,8 @@ def main():
         else:
             print("Pilihan tidak valid, coba lagi.")
         
-        post_action = input("Ingin kembali ke menu utama? (y/n): ")
-        if post_action.lower() != 'y':
+        post_action = post_action_menu()
+        if post_action == '2':
             print("Terima kasih telah menggunakan VulnXplorer!")
             break
 
