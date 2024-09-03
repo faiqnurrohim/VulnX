@@ -1,6 +1,8 @@
 import socket
 import os
 import sys
+import whois  # Pastikan library whois sudah terinstall (pip install python-whois)
+import subprocess
 
 # Fungsi untuk membersihkan tampilan terminal
 def clear_screen():
@@ -20,7 +22,7 @@ def show_header():
 # Fungsi untuk menampilkan menu dan mendapatkan pilihan pengguna
 def show_menu():
     print("1. Port Scanner")
-    print("2. Vulnerability Checker")
+    print("2. Live WHOIS Lookup")
     print("3. Service Enumerator")
     print("4. Exit\n")
     choice = input("Pilih fitur yang ingin Anda gunakan (1-4): ")
@@ -37,13 +39,14 @@ def port_scanner(target):
             print(f"Port {port} terbuka")
         sock.close()
 
-# Fungsi untuk memeriksa kerentanan pada port yang terbuka
-def vulnerability_checker(target):
-    # Dummy implementation
-    print(f"Memeriksa kerentanan pada target: {target}")
-    vulnerable_ports = [21, 22, 80]
-    for port in vulnerable_ports:
-        print(f"Port {port} pada {target} mungkin rentan!")
+# Fungsi untuk melakukan WHOIS Lookup secara real-time
+def whois_lookup(domain):
+    try:
+        w = whois.whois(domain)
+        print(f"\nInformasi WHOIS untuk domain: {domain}\n")
+        print(w)
+    except Exception as e:
+        print(f"Terjadi kesalahan saat melakukan WHOIS Lookup: {e}")
 
 # Fungsi untuk enumerasi layanan pada port yang terbuka
 def service_enumerator(target):
@@ -54,6 +57,7 @@ def service_enumerator(target):
         result = sock.connect_ex((target, port))
         if result == 0:
             try:
+                sock.send(b'HEAD / HTTP/1.0\r\n\r\n')
                 banner = sock.recv(1024).decode('utf-8').strip()
                 print(f"Port {port} menjalankan layanan: {banner}")
             except:
@@ -79,9 +83,9 @@ def main():
             clear_screen()
             port_scanner(target)
         elif choice == '2':
-            target = input("Masukkan IP address target: ")
+            domain = input("Masukkan domain untuk WHOIS lookup: ")
             clear_screen()
-            vulnerability_checker(target)
+            whois_lookup(domain)
         elif choice == '3':
             target = input("Masukkan IP address target: ")
             clear_screen()
