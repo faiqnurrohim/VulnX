@@ -1,6 +1,6 @@
 # VUNLX - Scanning Tools
 
-VUNLX adalah alat bantu berbasis pyhton yang mempunyai fungsi dasar untuk pemindaian kerentanan suatu target. Fitur utama yang bisa digunakan yaitu pemindaian port. mengidentifikasi kerentanan dan enumerasi layanan.
+VUNLX adalah alat bantu berbasis pyhton yang mempunyai fungsi dasar untuk pemindaian kerentanan suatu target. Fitur utama yang bisa digunakan yaitu pemindaian port. whois lookup dan enumerasi layanan.
 
 ## Installation
 
